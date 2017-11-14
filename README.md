@@ -1,11 +1,11 @@
-# admindash
-Set of web and CLI utilities for nix platform which make the life of website admin easier.
+# admindash: a bunch of web and console scripts for Cloudflare firewall operations and webserver logs quick analysis
+This is a set of simple utilities, written in PHP, for \*nix platforms, which make the life of website admin easier.
 This is basically a web interface for quick generation of long CLI commands like:
 
 `cd /var/www/website/data/logs/ 2>&1; find -newermt '2017-11-12 00:00' -not -newermt '2017-11-14 23:59' -exec zgrep -m 5000 '80.68.0.250' \{\} \;  | grep -E -v '\.css|\.js|\.svg|\.jpg|\.png|\.gif|\.jpeg'   2>&1
 `
 
-I created this set of utilities when I realized I am copypasting all these useful commands from my notepad to terminal multiple times per day. After I used admindash for a while, and liked it, I implemented more useful features like ip location resolving (via SXgeo) and simple Cloudflare firewall integration, and website username-to-ip resolving as well.
+I've started admindash when I realized I am copypasting all these useful commands from my notepad to terminal multiple times per day. After I used admindash for a while, and liked it, I implemented additional fancy features like ip location resolving (via SXgeo) and simple Cloudflare firewall integration, and website username-to-ip resolving as well.
 
 
 # Installation
@@ -16,6 +16,7 @@ I created this set of utilities when I realized I am copypasting all these usefu
   - do `chmod -R a+r /var/log/apache2/` to make already created log files readable
 - Access as http://yourwebsite.com/admindash/
 - Access CLI by executing php /admindash/cli.php
+*Warning: no authorization is implemented yet, just very basic ip-based check! Remove it and replace it with apache htpasswd or similar auth!*
 
 # Features
 - Cloudflare integration with quick ban form
