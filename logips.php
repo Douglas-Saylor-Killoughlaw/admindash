@@ -40,15 +40,17 @@ $search_ip_url = UTILITY_URL . "/?start_date=". date('Y-m-d', strtotime('-1 day'
 if (($fp = popen($cmd, "r"))) {
     while (!feof($fp)) {
         $f = fread($fp, 4096); 
+        if (empty($f)) continue;
+        
         $lines = explode("\n", $f);
 
         $new_out = '';
-
         // error?
         if (count($lines) < 3) {
             print_r($lines);
-            return;
+            break;
         }
+        
         foreach ($lines as $n => $l) {
 
             if ($n < 20) {
