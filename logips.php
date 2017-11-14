@@ -13,7 +13,7 @@ echo '<pre>';
 
 
 
-$cmd = "cd ". WEBSERVER_LOGS_PATH . " 2>&1; tail -n 15000 ". WEBSERVER_RECENT_LOG_FILES ." |cut -f 1 -d ' '|sort|uniq -c|sort -nr|more | head -n 50";
+$cmd = "cd ". WEBSERVER_LOGS_PATH . " 2>&1; tail -n 15000 ". WEBSERVER_RECENT_LOG_FILES ." |cut -f 1 -d ' '|sort|uniq -c|sort -nr|more | head -n 50 2>&1";
 echo '<b>Executing</b> ' . $cmd . "\n\n";
 flush();
 
@@ -35,7 +35,6 @@ foreach($cf_list as $cf_rule) {
 
 
 
-
 $search_ip_url = UTILITY_URL . "/?start_date=". date('Y-m-d', strtotime('-1 day')) ."&start_time=00%3A00&end_date=". date('Y-m-d') ."&end_time=23%3A59&ip={ip}&exclude=";
 
 if (($fp = popen($cmd, "r"))) {
@@ -44,6 +43,12 @@ if (($fp = popen($cmd, "r"))) {
         $lines = explode("\n", $f);
 
         $new_out = '';
+
+        // error?
+        if (count($lines) < 3) {
+            print_r($lines);
+            return;
+        }
         foreach ($lines as $n => $l) {
 
             if ($n < 20) {

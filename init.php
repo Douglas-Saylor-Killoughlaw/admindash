@@ -2,6 +2,10 @@
 
 require_once 'config.php';
 
+if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+}
+
 $web_access_allowed = !empty($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], $allowed_ips);
 $cli_access_allowed = php_sapi_name() == 'cli';
 
@@ -109,6 +113,11 @@ function cfunban($block_rule_id){
 
 function cflist(){
 
+    if (CF_ACCOUNT_EMAIL == 'service@website.com') {
+        // Cloudflare was not configured
+        return [];
+    }
+
     $cache = new Cache();
 
     if ($cflist = $cache->retrieve(CACHE_CF_LIST)) {
@@ -126,6 +135,18 @@ function cflist(){
     curl_setopt($ch, CURLOPT_URL, 'https://api.cloudflare.com/v4/zones/'. CF_ZONE_HASH .'/firewall/access_rules/rules/?page=1&per_page=200&order=mode');
     //curl_setopt($ch, CURLOPT_URL, 'https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules/');
     $return = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($httpcode > 250) {
+
+        $err = "Cloudflare returned http code " . $httpcode;
+        if (!empty($return)) {
+            $err .= ' Output:' . $return;
+        }
+        
+        throw new \Exception($err, 1);
+    }
+
     curl_close($ch);
     if ($return === false){
         return false;
