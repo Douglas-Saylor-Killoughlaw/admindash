@@ -4,7 +4,8 @@ This is basically a web interface for quick generation of long CLI commands like
 
 `cd /var/www/website/data/logs/ 2>&1; find -newermt '2017-11-12 00:00' -not -newermt '2017-11-14 23:59' -exec zgrep -m 5000 '80.68.0.250' \{\} \;  | grep -E -v '\.css|\.js|\.svg|\.jpg|\.png|\.gif|\.jpeg'   2>&1
 `
-which I created, when I was too tired to copypaste them from my notepad to terminal. After I used it for a while I've realized I can do more than that and added ip location resolving and simple Cloudflare firewall integration.
+
+I created this set of utilities when I realized I am copypasting all these useful commands from my notepad to terminal multiple times per day. After I used admindash for a while, and liked it, I implemented more useful features like ip location resolving (via SXgeo) and simple Cloudflare firewall integration, and website username-to-ip resolving as well.
 
 
 # Installation
