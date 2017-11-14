@@ -10,6 +10,7 @@ which answer day-to-day website admin questions: `which web pages the 80.68.0.25
 
 I've started admindash when I realized I am copypasting all these useful commands from my notepad to terminal multiple times per day. After I used admindash for a while, and liked it, I implemented additional fancy features like ip location resolving (via SXgeo) and simple Cloudflare firewall integration, and website username-to-ip resolving as well.
 
+Disclaimer: the code is bad, non-OOP, and contains mixed HTML and PHP! Sorry about that, I will consider rewriting to clean REST app if admindash gains any traction.
 
 # Installation
 - Clone to www folder of your website
