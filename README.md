@@ -11,7 +11,9 @@ I created this set of utilities when I realized I am copypasting all these usefu
 # Installation
 - Clone to www folder of your website
 - Copy config.php.dist to config.php and edit variables inside.
-- Make sure your apache logs folder is readable by the script
+- Make sure your apache logs folder is readable by the script:
+  - change 640 permission to 644 in your logrotate config `/etc/logrotate.d/apache2` or `/etc/logrotate.d/httpd`
+  - do `chmod -R a+r /var/log/apache2/` to make already created log files readable
 - Access as http://yourwebsite.com/admindash/
 - Access CLI by executing php /admindash/cli.php
 
