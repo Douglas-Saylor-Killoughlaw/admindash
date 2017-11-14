@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * The admin utility is expecting logrotate to leave files in the same directory as current logs, and expects zgrep to be installed in the system.
+ * So logs directory looks like this: http://prntscr.com/ha8sfv
+ */
+
+define('CACHE_CF_LIST', 'cflist'); 
+define('CF_ACCOUNT_EMAIL', 'service@website.com'); // CloudFlare email
+define('CF_AUTH_KEY', '79f21f8XXXXXXXXXXXXX9fabeb769c4'); // grab from https://www.cloudflare.com/a/profile http://prntscr.com/ha8ltk
+define('CF_ZONE_HASH', '160905e9fXXXXXXXXXc57ae1b6948'); // grab from CF web ui http://prntscr.com/ha8l2c
+define('WEBSERVER_LOGS_PATH', '/var/www/website/data/logs/');
+define('UTILITY_URL', 'https://website.com/admindash');
+define('WEBSERVER_RECENT_LOG_FILES', 'website.com_access.log de.website.com_access.log'); // most recent webserver logs file for tracked domains, space delimited
+define('WEBSERVER_STATUS_PAGE', 'https://website.com/server-status');
+
+
+define('WEBSITE_USERS_INFO', true); // set to false if you don't need overlay with your website users - see website_users()
+define('WEBSITE_MYSQL_USER', 'user');
+define('WEBSITE_MYSQL_PASSWD', 'pwd');
+define('WEBSITE_MYSQL_HOST', 'localhost');
+define('WEBSITE_MYSQL_DB', 'dbname');
+
+$allowed_ips = ['127.0.0.1', '21.123.12.12']; // admin ips. @TODO: replace with Apache auth or any other auth method. 
+
+
+
+
+/**
+ * This is an example function for custom Drupal installation.
+ * Write your custom one, and return an array which looks like this:
+ *  ['123.12.12.123' => 'Username1', '12.23.23.23' => 'Username2', ]
+ * In the example, we use three tables in mysql, `bdr_log_operations` and `watchdog` where our website stores ips and recent actions,
+ * and `users` which contains usernames.
+ * The utility will use this array to match ips to your website usernames for better understanding who generates server load.
+ */
+function website_users() {
+    if (!WEBSITE_USERS_INFO) { 
+        return []; 
+    }
+
+    // Create connection
+    $conn = new mysqli(WEBSITE_MYSQL_HOST, WEBSITE_MYSQL_USER, WEBSITE_MYSQL_PASSWD, WEBSITE_MYSQL_DB);
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    } 
+
+    $sql = "SELECT u.uid, u.name, b.hostname FROM website_prod.users u 
+INNER JOIN users_roles r ON u.uid=r.uid AND r.rid=4
+
+INNER JOIN ( SELECT uid, hostname FROM website_db2.bdr_log_operations WHERE created >  (unix_timestamp() - 60*60) GROUP BY uid ) b ON u.uid=b.uid
+
+UNION
+
+SELECT u.uid, u.name, b.hostname FROM website_prod.users u 
+INNER JOIN users_roles r ON u.uid=r.uid AND r.rid=4
+
+INNER JOIN
+(SELECT uid,hostname FROM website_db2.watchdog WHERE TIMESTAMP > (unix_timestamp() - 60*15) AND uid>0 GROUP BY hostname ORDER BY wid DESC) b ON u.uid=b.uid
+
+";
+    $result = $conn->query($sql);
+    
+    $users = [];
+    while ($row = $result->fetch_assoc()) {
+        $users[$row['hostname']] = $row;
+    }
+
+    $conn->close();
+    return $users;
+}
