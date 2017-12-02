@@ -27,19 +27,28 @@ if (!empty($exclude)) {
 }
 
 
+// three slashes to produce \/ which is required for sed regex syntax
+$sed_start_date = date('\\\[d\\\/M\\\/Y:H:i', strtotime($start_date));
+$sed_end_date = date('\\\[d\\\/M\\\/Y:H:i', strtotime($end_date));
+
+// cut last minute char to reduce sed failing probability when he could not find exact minute
+$sed_start_date = substr($sed_start_date, 0, -1);
+$sed_end_date = substr($sed_end_date, 0, -1);
+
+$sed_regex = '/' . $sed_start_date . '/,/' . $sed_end_date . '/p';
 
 
-
+$group_by_op = "| sed -nr " . escapeshellarg($sed_regex);
 
 
 if ($group_by == 'path') {
-    $group_by_op = "| cut -f 2 -d '\"' |cut -f 2 -d ' '|sort|uniq -c|sort -nr|more";
+    $group_by_op .= "| cut -f 2 -d '\"' |cut -f 2 -d ' '|sort|uniq -c|sort -nr|more";
 } elseif ($group_by == 'useragent') {
-    $group_by_op = "| cut -f 6 -d '\"' |sort|uniq -c|sort -nr|more";
+    $group_by_op .= "| cut -f 6 -d '\"' |sort|uniq -c|sort -nr|more";
 } elseif ($group_by == 'ip') {
-    $group_by_op = "| awk '{print $1}' | sort -n | uniq -c | sort -nr | head -20";    
+    $group_by_op .= "| awk '{print $1}' | sort -n | uniq -c | sort -nr | head -20";    
 } else {
-    $group_by_op = ' ';
+    $group_by_op .= ' ';
 }
 
 $cmd = 'cd '. WEBSERVER_LOGS_PATH .' 2>&1; find -newermt '. escapeshellarg($start_date) .' -not -newermt '. escapeshellarg($end_date) .' -exec zgrep -m 5000 '. escapeshellarg($ip) .' \{\} \; '. 
