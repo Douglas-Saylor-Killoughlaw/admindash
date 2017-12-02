@@ -2,12 +2,11 @@
 
 require_once 'config.php';
 
-if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
-}
-
-$web_access_allowed = !empty($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], $allowed_ips);
 $cli_access_allowed = php_sapi_name() == 'cli';
+$web_access_allowed = !empty($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], $allowed_ips);
+if (!$web_access_allowed && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $web_access_allowed = in_array($_SERVER['HTTP_X_FORWARDED_FOR'], $allowed_ips);
+}
 
 if (!$web_access_allowed && !$cli_access_allowed) {
     exit('access denied');
@@ -17,6 +16,11 @@ require_once 'cache.class.php';
 
 $cache = new Cache();
 $cache->eraseExpired();
+
+// scripts operate in server timezone, not php set timezone
+$server_timezone_name = exec('date +"%Z"');
+date_default_timezone_set($server_timezone_name);
+
 
 function ip2city($ip)
 {

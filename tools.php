@@ -1,6 +1,11 @@
 <?php
 require_once 'init.php';
 require_once 'topnav.php';
+
+
+
+
+
 ?>
 
 <script src="resources/moment.min.js"></script>
@@ -12,7 +17,7 @@ require_once 'topnav.php';
     <h3>Timestamp to time</h3>
   <input type="text" v-model="timestamp" /> <br><br>
   <br><br>Local time: <input type="text" :value='timestamp_date' /> 
-  <br><br>Server (UTC): <input type="text" :value='timestamp_server_date' /> 
+  <br><br>Server ({{ serverTimezoneName }} {{ serverTimezoneOffset }}): <input type="text" :value='timestamp_server_date' /> 
   <br><br>Apache2 log format: <input type="text" :value='timestamp_server_date_apache' /> 
   <br><br>Delaware: <input type="text" :value='timestamp_delaware_date' /> 
   <br><br><br>
@@ -26,7 +31,9 @@ require_once 'topnav.php';
       el: '#app-2',
       data: {
         timestamp: '',
-        date: ''
+        date: '',
+        serverTimezoneName: <?= json_encode($server_timezone_name) ?>,
+        serverTimezoneOffset: <?= json_encode($server_timezone_offset) ?>,
     },
     computed: {
         timestamp_date: function() {
@@ -34,11 +41,11 @@ require_once 'topnav.php';
         },
         timestamp_server_date: function() {
             // "Etc/UTC|Universal"
-            return moment.unix(this.timestamp).tz("Etc/UTC").format('DD-MM-YYYY HH:mm:ss')
+            return moment.unix(this.timestamp).tz(this.serverTimezoneName).format('DD-MM-YYYY HH:mm:ss')
         },
         timestamp_server_date_apache: function() {
             // "Etc/UTC|Universal"
-            return moment.unix(this.timestamp).tz("Etc/UTC").format('DD/MMM/YYYY:HH:mm:ss')
+            return moment.unix(this.timestamp).tz(this.serverTimezoneName).format('DD/MMM/YYYY:HH:mm:ss')
         },
         timestamp_delaware_date: function() {
             // "Etc/UTC|Universal"
