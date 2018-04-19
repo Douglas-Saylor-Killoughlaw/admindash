@@ -38,7 +38,7 @@ $sed_end_date = substr($sed_end_date, 0, -1);
 $sed_regex = '/' . $sed_start_date . '/,/' . $sed_end_date . '/p';
 
 
-$group_by_op = "| sed -nr " . escapeshellarg($sed_regex);
+//$group_by_op = "| sed -nr " . escapeshellarg($sed_regex);
 
 
 if ($group_by == 'path') {
